@@ -29,10 +29,10 @@
 //
 // Module map
 // 0. Configuration: toggle syntax sugar, error handling, and the object model.
-// 1. Primitives: Rust-style aliases (i32, f64, Vec<T>...).
-// 2. Syntax sugar: fn/let/let_mut, access modifiers, Case/DefaultCase helpers.
-// 3. Error handling: Option/Result with bool and pointer semantics plus match.
-// 4. Object model: trait/impl macros that separate interface from data.
+// 1. Syntax sugar: Rust-style aliases (i32, f64, Vec<T>...) and fn/let/let_mut.
+// 2. Error handling: Option/Result with bool and pointer semantics plus match
+//    helpers (Case/DefaultCase).
+// 3. Object model: trait/impl macros, from/data/inner, pub for public surface.
 //
 // =============================================================================
 // 0. Configuration
@@ -40,9 +40,9 @@
 // All modules are enabled by default. To opt in selectively:
 // 1. Define `DO_NOT_ENABLE_ALL_RUSTIC` before including this header.
 // 2. Enable any combination of:
-//    - `ENABLE_RS_KEYWORD`: fn, let, pub, Case, DefaultCase, etc.
-//    - `ENABLE_RS_ERROR`  : Option, Result, panic, and helpers.
-//    - `ENABLE_RS_OBJECT` : trait, impl, from, data, inner macros.
+//    - `ENABLE_RS_KEYWORD`: fn, let, let_mut.
+//    - `ENABLE_RS_ERROR`  : Option, Result, panic, and Case/DefaultCase helpers.
+//    - `ENABLE_RS_OBJECT` : trait, impl, from, data, inner, pub macros.
 // Tip: modules are independent; you can keep Result without syntax sugar, or use
 // trait macros alone.
 //
@@ -70,26 +70,18 @@
 // =============================================================================
 // Requires: ENABLE_RS_KEYWORD
 //
-// A. Functions and variables
-//    - `fn`      -> `auto`       : return type deduction (C++14+).
-//    - `let`     -> `const auto` : immutable by default.
-//    - `let_mut` -> `auto`       : mutable binding.
+// Functions and variables
+// - `fn`      -> `auto`       : return type deduction (C++14+).
+// - `let`     -> `const auto` : immutable by default.
+// - `let_mut` -> `auto`       : mutable binding.
 //
-//    Example
-//      fn add(i32 a, i32 b) -> i32 { return a + b; }
-//      let pi = 3.14;
-//      let_mut count = 0;
-//
-// B. Access control and inheritance
-//    - `pub`   -> `public`
-//    - `priv`  -> `private`
-//    - `prot`  -> `protected`
-//    - `from`  -> `public`     : semantic interface inheritance (Class: from Trait).
-//    - `data`  -> `protected`  : semantic data mixin (Class: data DataStruct).
-//    - `inner` -> `protected`  : recommended visibility for implementation details.
+// Example
+//   fn add(i32 a, i32 b) -> i32 { return a + b; }
+//   let pi = 3.14;
+//   let_mut count = 0;
 //
 // =============================================================================
-// 3. Error Handling & Matching
+// 2. Error Handling & Matching
 // =============================================================================
 // Requires: ENABLE_RS_ERROR
 // Intent: force explicit handling of success or failure instead of silent
@@ -136,7 +128,7 @@
 //      }
 //
 // =============================================================================
-// 4. Object Model (Trait / Interface)
+// 3. Object Model (Trait / Interface)
 // =============================================================================
 // Requires: ENABLE_RS_OBJECT
 // Macros emulate Rust's trait definitions and impl blocks while keeping data and
@@ -152,8 +144,8 @@
 // B. Implement a trait
 //    - Inheritance syntax: `class MyClass : from MyTrait`
 //    - `impl(...)`: expands to `override` for explicit implementations.
-//    - Recommended pattern: `class X : from Trait, data DataStruct` to keep
-//      state and behavior in distinct bases.
+//    - Recommended pattern: `class X : from Trait, data DataStruct { inner: pub: }`
+//      to keep state and behavior in distinct bases and make access levels explicit.
 //
 //    Example
 //      trait(Draw,
@@ -197,8 +189,31 @@
 #include <format> // C++20
 
 // ==========================================
-// 1. Primitives
+// 1. Syntax Sugar (Type aliases + bindings)
 // ==========================================
+// Requires: ENABLE_RS_KEYWORD
+//
+// Rust-style aliases to reduce typing while keeping intent clear.
+// | Rust style | C++ native type    | Notes |
+// |:-----------|:-------------------|:------|
+// | i8/u8      | int8_t / uint8_t   |       |
+// | i32/u32    | int32_t / uint32_t |       |
+// | f32/f64    | float / double     |       |
+// | usize      | size_t             |       |
+// | String     | std::string        | Alias only, not Rust's memory model |
+// | Vec<T>     | std::vector<T>     |       |
+//
+// Functions and variables:
+// - `fn`      -> `auto`       : return type deduction (C++14+).
+// - `let`     -> `const auto` : immutable by default.
+// - `let_mut` -> `auto`       : mutable binding.
+//
+// Example:
+//   fn add(i32 a, i32 b) -> i32 { return a + b; }
+//   let pi = 3.14;
+//   let_mut count = 0;
+
+#ifdef ENABLE_RS_KEYWORD
 using u8 = uint8_t;
 using u16 = uint16_t;
 using u32 = uint32_t;
@@ -216,29 +231,20 @@ using String = std::string;
 template<typename T>
 using Vec = std::vector<T>;
 
-// ==========================================
-// 2. Keywords & Match
-// ==========================================
-#ifdef ENABLE_RS_KEYWORD
 #define fn auto
 #define let const auto
 #define let_mut auto
-
-// Access Modifiers
-#define pub public
-#define priv private
-#define prot protected
-
-// Match Sugar
-// Usage: res.match( Case(v){...}, Case(e){...} )
-#define Case(Var) [&](auto&& Var)
-#define DefaultCase() [&]()
 #endif
 
 // ==========================================
-// 3. Error Handling
+// 2. Error Handling
 // ==========================================
 #ifdef ENABLE_RS_ERROR
+
+// Match helpers (kept with error model so Option/Result users always have them)
+// Usage: res.match( Case(v){...}, Case(e){...} )
+#define Case(Var) [&](auto&& Var)
+#define DefaultCase() [&]()
 
 struct Unit {
     bool operator==(const Unit&) const { return true; }
@@ -397,9 +403,12 @@ struct Name : public Interface { \
     __VA_ARGS__ \
 };
 // Keep interface and data separate; inherit both explicitly.
-// Example: class Foo : from BarTrait, data BarState
+// Recommended shape: class Foo : from BarTrait, data BarState { inner: pub: };
 #define from public
 #define data protected
+
+// Access modifiers focused on interface vs implementation.
+#define pub public
 // inner: shorthand for protected members that stay visible to derived classes.
 #define inner protected
 
