@@ -1,4 +1,6 @@
 # rustic.hpp
+[Chinese version](README_ZH.md)
+
 
 Rust-inspired utilities for modern C++ projects. The single header brings Option/Result, match-style dispatch, and trait/impl ergonomics without adding dependencies or build steps.
 
