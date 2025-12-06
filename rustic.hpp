@@ -32,7 +32,7 @@
 // 1. Syntax sugar: Rust-style aliases (i32, f64, Vec<T>...) and fn/let/let_mut.
 // 2. Error handling: Option/Result with bool and pointer semantics plus match
 //    helpers (Case/DefaultCase).
-// 3. Object model: trait/impl macros, from/data/inner, pub for public surface.
+// 3. Object model: trait/impl macros, from/datafrom/inner, pub for public surface.
 //
 // =============================================================================
 // 0. Configuration
@@ -42,7 +42,7 @@
 // 2. Enable any combination of:
 //    - `ENABLE_RS_KEYWORD`: fn, let, let_mut.
 //    - `ENABLE_RS_ERROR`  : Option, Result, panic, and Case/DefaultCase helpers.
-//    - `ENABLE_RS_OBJECT` : trait, impl, from, data, inner, pub macros.
+//    - `ENABLE_RS_OBJECT` : trait, impl, from, datafrom, inner, pub macros.
 // Tip: modules are independent; you can keep Result without syntax sugar, or use
 // trait macros alone.
 //
@@ -144,7 +144,7 @@
 // B. Implement a trait
 //    - Inheritance syntax: `class MyClass : from MyTrait`
 //    - `impl(...)`: expands to `override` for explicit implementations.
-//    - Recommended pattern: `class X : from Trait, data DataStruct { inner: pub: }`
+//    - Recommended pattern: `class X : from Trait, datafrom DataStruct { inner: pub: }`
 //      to keep state and behavior in distinct bases and make access levels explicit.
 //
 //    Example
@@ -155,7 +155,7 @@
 //
 //      struct CircleData { f32 r; };
 //
-//      class Circle : from Draw, data CircleData {
+//      class Circle : from Draw, datafrom CircleData {
 //      pub:
 //          Circle(f32 r) : CircleData{r} {}
 //          impl(draw() -> void) {
@@ -403,9 +403,9 @@ struct Name : public Interface { \
     __VA_ARGS__ \
 };
 // Keep interface and data separate; inherit both explicitly.
-// Recommended shape: class Foo : from BarTrait, data BarState { inner: pub: };
+// Recommended shape: class Foo : from BarTrait, datafrom BarState { inner: pub: };
 #define from public
-#define data protected
+#define datafrom protected
 
 // Access modifiers focused on interface vs implementation.
 #define pub public

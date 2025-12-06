@@ -10,7 +10,7 @@ trait(Renderable,
 
 struct RectData { f32 w; f32 h; };
 
-class Rect : from Renderable, data RectData {
+class Rect : from Renderable, datafrom RectData {
 inner:
     // inner is protected; derived classes can access data.
 public:

@@ -11,7 +11,7 @@ Rust-inspired utilities for modern C++ projects. This header delivers Option/Res
 - Module deep dive
   - Syntax sugar and aliases (fn, let, i32/u32, Vec)
   - Error model (Option, Result, panic, match, unwrap family)
-  - Object model (trait/impl, from/data/inner, pub)
+  - Object model (trait/impl, from/datafrom/inner, pub)
 - Patterns and best practices
 - Integration examples
 - Limitations and cautions
@@ -20,7 +20,7 @@ Rust-inspired utilities for modern C++ projects. This header delivers Option/Res
 ## What this library provides
 - Rust-like error model: `Option` and `Result` with boolean and pointer semantics, plus `match` helpers (`Case`, `DefaultCase`) for explicit branching.
 - Rust-style aliases and binding sugar: `i32/u32`, `f64`, `Vec<T>`, `String`, plus `fn`, `let`, `let_mut`.
-- Trait-style macros: `trait`/`impl` plus `from`/`data` to separate interfaces and storage, with `pub`/`inner` for public surface vs. implementation.
+- Trait-style macros: `trait`/`impl` plus `from`/`datafrom` to separate interfaces and storage, with `pub`/`inner` for public surface vs. implementation.
 - Header-only, zero third-party dependencies; relies only on the C++17/20 standard library.
 
 ## Compatibility and build notes
@@ -91,7 +91,7 @@ Macros that emulate Rust-style traits:
 - `must(...)` declares pure virtual functions that subclasses must implement.
 - `def(...)` declares virtual functions with defaults. It can supply a default implementation inside the trait and can also be used to add new virtual methods in the trait body; it is a thin wrapper over `virtual` with an optional definition.
 - `impl(...)` expands to `override` in implementations.
-- `from` and `data` are public and protected inheritance aliases. Recommended shape: `class Foo : from BarTrait, data BarState { inner: pub: };` to separate interface/data and make access levels explicit.
+- `from` and `datafrom` are public and protected inheritance aliases. Recommended shape: `class Foo : from BarTrait, datafrom BarState { inner: pub: };` to separate interface/data and make access levels explicit.
 - `inner` is a protected shorthand for implementation details, and `pub` maps to `public` for the external surface.
 
 Example:
@@ -103,7 +103,7 @@ trait(Renderable,
 
 struct CircleData { f32 r; };
 
-class Circle : from Renderable, data CircleData {
+class Circle : from Renderable, datafrom CircleData {
 pub:
     Circle(f32 r) : CircleData{r} {}
     impl(draw() -> void) {
@@ -122,7 +122,7 @@ pub:
       std::cout << user->name;
   }
   ```
-- Keep trait state in a separate `data` base to prevent interface inheritance from carrying storage members.
+- Keep trait state in a separate `datafrom` base to prevent interface inheritance from carrying storage members.
 - If you only need part of the library, gate features with macros to minimize namespace noise.
 - When returning values from `match`, ensure all branches return the same type; otherwise, rely on side effects only.
 
@@ -163,7 +163,7 @@ trait(Renderable,
 
 struct SquareData { f32 side; };
 
-class Square : from Renderable, data SquareData {
+class Square : from Renderable, datafrom SquareData {
 pub:
     Square(f32 s) : SquareData{s} {}
     impl(draw() -> void) {

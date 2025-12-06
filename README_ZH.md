@@ -11,7 +11,7 @@
 - 模块详解
   - 语法糖与类型别名（fn, let, i32/u32, Vec）
   - 错误模型（Option, Result, panic, match、unwrap 系列）
-  - 对象模型（trait/impl, from/data/inner, pub）
+  - 对象模型（trait/impl, from/datafrom/inner, pub）
 - 使用模式与最佳实践
 - 集成示例
 - 限制与注意事项
@@ -20,7 +20,7 @@
 ## 本库提供什么
 - 错误模型：`Option` 与 `Result`，具备布尔和指针语义，并提供 `match` 辅助（`Case`、`DefaultCase`）。
 - 语法糖与别名：`i32/u32`、`f64`、`Vec<T>`、`String` 等类型别名，以及 `fn`、`let`、`let_mut` 等绑定语法。
-- 对象模型：`trait`/`impl` 与 `from`/`data`，配合 `pub`/`inner` 划分对外接口与实现细节。
+- 对象模型：`trait`/`impl` 与 `from`/`datafrom`，配合 `pub`/`inner` 划分对外接口与实现细节。
 - 纯头文件、零第三方依赖，只依赖 C++17/20 标准库。
 
 ## 兼容性与编译说明
@@ -91,7 +91,7 @@ unwrap 系列：选择何时使用
 - `must(...)` 声明必须实现的纯虚函数。
 - `def(...)` 声明带默认实现的虚函数，也可以在 trait 内新增方法并给出默认实现；本质是对 `virtual` 的简明包装。
 - `impl(...)` 在实现处展开为 `override`。
-- `from`、`data` 是 public/protected 继承别名。推荐形式：`class Foo : from BarTrait, data BarState { inner: pub: };` 既分离接口与数据，也让访问级别明确。
+- `from`、`datafrom` 是 public/protected 继承别名。推荐形式：`class Foo : from BarTrait, datafrom BarState { inner: pub: };` 既分离接口与数据，也让访问级别明确。
 - `inner` 是用于实现细节的 protected 简写，`pub` 映射到 `public` 作为对外接口。
 
 示例：
@@ -103,7 +103,7 @@ trait(Renderable,
 
 struct CircleData { f32 r; };
 
-class Circle : from Renderable, data CircleData {
+class Circle : from Renderable, datafrom CircleData {
 pub:
     Circle(f32 r) : CircleData{r} {}
     impl(draw() -> void) {
@@ -122,7 +122,7 @@ pub:
       std::cout << user->name;
   }
   ```
-- 使用 `data` 基类存放状态，避免接口继承链携带成员数据。
+- 使用 `datafrom` 基类存放状态，避免接口继承链携带成员数据。
 - 只需部分功能时，用宏开关裁剪，减少命名空间污染。
 - `match` 若需要返回值，所有分支必须返回同一类型；若仅做副作用则不返回。
 
@@ -163,7 +163,7 @@ trait(Renderable,
 
 struct SquareData { f32 side; };
 
-class Square : from Renderable, data SquareData {
+class Square : from Renderable, datafrom SquareData {
 pub:
     Square(f32 s) : SquareData{s} {}
     impl(draw() -> void) {
